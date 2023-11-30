@@ -5,13 +5,14 @@ import { BarLoader } from "react-spinners";
 interface Props {
   handleTimestamp: (value: string) => void;
   handleViewGraph: (value: boolean) => void;
+  handleFlightId: (value: string) => void;
 }
 
-const Form = ({ handleTimestamp, handleViewGraph }: Props) => {
+const Form = ({ handleTimestamp, handleViewGraph, handleFlightId }: Props) => {
   const [flightId, setFlightId] = useState<string>(
     "2077_6196975_odd_egt_reading" // Set as default value for now
   );
-  const [method, setTempMethod] = useState<string>("lime");
+  const method = "lime";
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const { mutate, isLoading, isSuccess, isError } = useForm({
@@ -24,13 +25,10 @@ const Form = ({ handleTimestamp, handleViewGraph }: Props) => {
     setFlightId(e.target.value);
   };
 
-  const handleMethodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setTempMethod(e.target.value);
-  };
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     mutate();
+    handleFlightId(flightId);
     if (isSuccess) {
       handleTimestamp("");
     }
@@ -99,20 +97,6 @@ const Form = ({ handleTimestamp, handleViewGraph }: Props) => {
           </select>
         </div>
 
-        <div className="w-full md:w-1/2 px-3">
-          <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-            Method:
-          </label>
-          <select
-            className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-            value={method}
-            onChange={handleMethodChange}
-          >
-            <option value="lime">Lime</option>
-            <option value="shap">Shap</option>
-            <option value="integrated_gradients">IG</option>
-          </select>
-        </div>
         <button
           type="submit"
           className="w-[100px] h-10 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"

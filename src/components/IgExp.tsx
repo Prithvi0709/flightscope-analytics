@@ -3,8 +3,6 @@ interface Props {
 }
 
 const IgExp = ({ jsonData }: Props) => {
-  console.log(jsonData?.data_value);
-
   function sortData(data: Record<string, number>): Record<string, number> {
     // Convert the data object into an array of objects
     const dataArray = Object.entries(data).map(([key, value]) => ({

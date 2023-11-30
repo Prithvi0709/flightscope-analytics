@@ -106,10 +106,6 @@ const PredictionChart = ({ handleOnClick }: Props) => {
 
   const handleClick = (data: any) => {
     if (data && data.activePayload[0].payload.prediction === 1) {
-      console.log(
-        "Clicked timestamp:",
-        data.activePayload[0].payload.timestamp
-      );
       handleOnClick(data.activePayload[0].payload.timestamp);
     }
     handleOnClick(data.activePayload[0].payload.timestamp);
