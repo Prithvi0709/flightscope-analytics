@@ -4,11 +4,15 @@ import { BarLoader } from "react-spinners";
 
 interface Props {
   handleTimestamp: (value: string) => void;
-  handleViewGraph: (value: boolean) => void;
+  handleViewResults: (value: boolean) => void;
   handleFlightId: (value: string) => void;
 }
 
-const Form = ({ handleTimestamp, handleViewGraph, handleFlightId }: Props) => {
+const Form = ({
+  handleTimestamp,
+  handleViewResults,
+  handleFlightId,
+}: Props) => {
   const [flightId, setFlightId] = useState<string>(
     "2077_6196975_odd_egt_reading" // Set as default value for now
   );
@@ -21,7 +25,7 @@ const Form = ({ handleTimestamp, handleViewGraph, handleFlightId }: Props) => {
   });
 
   const handleFlightIdChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    handleViewGraph(false);
+    handleViewResults(false);
     setFlightId(e.target.value);
   };
 
@@ -33,7 +37,7 @@ const Form = ({ handleTimestamp, handleViewGraph, handleFlightId }: Props) => {
       handleTimestamp("");
     }
     setTimeout(() => {
-      handleViewGraph(true);
+      handleViewResults(true);
     }, 3000);
   };
 

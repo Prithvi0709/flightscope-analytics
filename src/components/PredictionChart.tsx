@@ -20,7 +20,7 @@ const PredictionChart = ({ handleOnClick }: Props) => {
     Object.entries(prediction?.data?.data_value).map(
       ([timestamp, prediction]) => ({
         timestamp,
-        prediction: (prediction as number) >= 0.5 ? 1 : 0,
+        prediction: (prediction as number) >= 0.5 ? 0 : 1, // Interchanging zeros and ones
       })
     );
 
@@ -29,7 +29,7 @@ const PredictionChart = ({ handleOnClick }: Props) => {
     Object.entries(real?.data?.data_value).map(
       ([true_timestamp, prediction]) => ({
         true_timestamp,
-        true_prediction: prediction,
+        true_prediction: (prediction as number) === 0 ? 1 : 0, // Interchanging zeros and ones
       })
     );
 
@@ -92,10 +92,11 @@ const PredictionChart = ({ handleOnClick }: Props) => {
           }}
         >
           <p>{`${formattedDate} ${formattedTime}`}</p>
-          {payload[0].value == 1 ? (
-            <p className="text-green-500">Normal</p>
-          ) : (
+          {payload[0].value == 1 ? ( // One signifies Anomaly
             <p className="text-red-600">Anomaly</p>
+          ) : (
+            // Zero signifies Anomaly
+            <p className="text-green-500">Normal</p>
           )}
         </div>
       );

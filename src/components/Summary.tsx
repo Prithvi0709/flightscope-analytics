@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../hooks/baseUrl";
 import LimeExp from "./LimeExp";
+import { ClipLoader } from "react-spinners";
+import ShapExp from "./ShapExp";
+import IgExp from "./IgExp";
+import getTopLimeFeatures, {
+  getTopIgFeatures,
+  getTopShapFeatures,
+} from "../helper/getTopFeatures";
 
 interface Props {
   flightId: string;
@@ -10,75 +17,72 @@ interface Props {
 interface ResultsType {
   [key: string]: any; // Replace 'any' with a more specific type if known
 }
-
-interface LimeDataItem {
-  feature: string;
-  rawValue: number;
-  attributionValue: number;
-}
-
-type DataDictionary = { [key: string]: number };
+type Tab = "lime" | "shap" | "integrated_gradients";
 
 const Summary = ({ flightId, timestamp }: Props) => {
   const [methodIndex, setMethodIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState<Tab>("lime");
   const [results, setResults] = useState<ResultsType>({});
   const [viewResults, setViewResults] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const methods = ["lime", "shap", "integrated_gradients"];
 
   useEffect(() => {
-    if (methodIndex < methods.length) {
-      const method = methods[methodIndex];
-      console.log(method);
+    setIsLoading(true);
 
-      // Delay the submit_form API call by 5 seconds
-      setTimeout(() => {
-        console.log("Submitting Form");
+    const processMethod = async () => {
+      if (methodIndex < methods.length) {
+        if (methodIndex === 0 || results[methods[methodIndex - 1]]) {
+          console.log("Submitting Form");
+          try {
+            const submitResponse = await axiosInstance.get("/submit_form", {
+              params: {
+                flightId: flightId,
+                method: methods[methodIndex],
+              },
+              headers: { "ngrok-skip-browser-warning": "69420" },
+            });
 
-        // Submit Form API
-        axiosInstance
-          .get("/submit_form", {
-            params: {
-              flightId: flightId,
-              method: method,
-            },
-            headers: { "ngrok-skip-browser-warning": "69420" },
-          })
-          .then((submitResponse) => {
             console.log(submitResponse.status);
-
             if (submitResponse.status === 200) {
-              // Delay the get_explainability API call by 5 seconds
-              setTimeout(() => {
-                console.log("Getting Data");
+              setTimeout(async () => {
+                try {
+                  console.log("Getting Data");
+                  const explainResponse = await axiosInstance.get(
+                    "/get_explainability",
+                    {
+                      params: {
+                        timestamp: timestamp,
+                      },
+                      headers: { "ngrok-skip-browser-warning": "69420" },
+                    }
+                  );
 
-                axiosInstance
-                  .get("/get_explainability", {
-                    params: {
-                      timestamp: timestamp,
-                    },
-                    headers: { "ngrok-skip-browser-warning": "69420" },
-                  })
-                  .then((explainResponse) => {
-                    console.log("Explanation Data ", explainResponse.data);
+                  console.log("Explanation Data ", explainResponse.data);
+                  setResults((prevResults) => ({
+                    ...prevResults,
+                    [methods[methodIndex]]: explainResponse.data,
+                  }));
 
-                    setResults((prevResults) => ({
-                      ...prevResults,
-                      [method]: explainResponse.data,
-                    }));
-                  })
-                  .catch((error) => {
-                    console.error("Error Retrieving Data:", error);
-                  });
-
-                // Move to the next method
-                setMethodIndex(methodIndex + 1);
-              }, 5000); // 5000 milliseconds delay for get_explainability
+                  // Move to the next method after getting the explainability data
+                  setMethodIndex(methodIndex + 1);
+                } catch (error) {
+                  console.error("Error Retrieving Data:", error);
+                }
+              }, 500); // 5000 milliseconds delay for get_explainability
             }
-          });
-      }, 10000); // 5000 milliseconds delay for submit_form
-    } else {
-      setViewResults(true);
-    }
+          } catch (error) {
+            console.error("Error Submitting Form:", error);
+          }
+        }
+      } else {
+        setIsLoading(false);
+        setActiveTab("lime");
+        setViewResults(true);
+      }
+    };
+
+    processMethod();
   }, [methodIndex]);
 
   useEffect(() => {
@@ -88,51 +92,9 @@ const Summary = ({ flightId, timestamp }: Props) => {
     setResults({}); // Also reset viewResults to start the process over
   }, [timestamp]); // Dependency array includes timestamp
 
-  function getTopLimeFeatures(data: any, n: number): string[] {
-    const transformedData = data?.map(
-      ([feature, rawValue, attributionValue]: LimeDataItem[]) => ({
-        feature,
-        rawValue,
-        attributionValue,
-      })
-    );
-    // Sort the data based on attribution values (ascending order)
-    const sortedData = transformedData?.sort(
-      (a: any, b: any) => b?.attributionValue - a?.attributionValue
-    );
-
-    // Filter out positive attributions and slice the first n elements
-    return sortedData
-      ?.filter((item: any) => item.attributionValue > 0)
-      ?.slice(0, n)
-      ?.map((item: any) => item.feature as string);
-  }
-
   const limeData =
     results["lime"]?.data_value[2] &&
     getTopLimeFeatures(results["lime"]?.data_value[2], 5);
-  console.log(limeData);
-
-  function getTopShapFeatures(
-    dictionary: DataDictionary,
-    array: number[],
-    n: number
-  ): string[] {
-    // Step 1: Combine the data
-    const combinedData =
-      dictionary &&
-      Object.keys(dictionary).map((key, index) => ({
-        label: key,
-        value: dictionary[key],
-        sortBy: array[index],
-      }));
-
-    // Step 2: Sort the combined data
-    combinedData?.sort((a, b) => a.sortBy - b.sortBy);
-
-    // Step 3: Extract the top N labels
-    return combinedData?.slice(0, n)?.map((item) => item.label);
-  }
 
   const shapData =
     results["shap"]?.data_value[0] &&
@@ -141,52 +103,89 @@ const Summary = ({ flightId, timestamp }: Props) => {
       results["shap"]?.data_value[0]?.values,
       5
     );
-  console.log(shapData);
-
-  function getTopIgFeatures(dictionary: DataDictionary, n: number): string[] {
-    // Step 1: Filter negative values
-    const negativeValues =
-      dictionary &&
-      Object.keys(dictionary)
-        .filter((key) => dictionary[key] < 0)
-        .map((key) => ({ label: key, value: dictionary[key] }));
-
-    // Step 2: Sort the filtered data
-    negativeValues?.sort((a, b) => a.value - b.value);
-
-    // Step 3: Extract the top N labels
-    return negativeValues?.slice(0, n)?.map((item) => item.label);
-  }
 
   const igData =
     results["integrated_gradients"]?.data_value &&
     getTopIgFeatures(results["integrated_gradients"]?.data_value, 5);
-  console.log(igData);
 
-  const rows = limeData?.map((_: any, index: number) => (
-    <tr key={index}>
-      <td>{limeData && limeData[index]}</td>
-      <td>{shapData && shapData[index]}</td>
-      <td>{igData && igData[index]}</td>
-    </tr>
-  ));
-
-  // Render component with results
   return (
     <div>
+      {isLoading && (
+        <div className="w-full h-[100px] flex justify-center items-center">
+          <ClipLoader />
+        </div>
+      )}
       {viewResults && (
         <>
-          <table>
-            <thead>
-              <tr>
-                <th>Lime</th>
-                <th>Shap</th>
-                <th>IG</th>
-              </tr>
-            </thead>
-            <tbody>{rows}</tbody>
-          </table>
-          <LimeExp jsonData={results["lime"]} />
+          <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-6">
+            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+              Explainability Summary (Highest to Lowest)
+            </label>
+            <table className="w-full text-sm text-center text-gray-500">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
+                <tr>
+                  <th scope="col" className="py-3 px-6">
+                    Lime
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    Shap
+                  </th>
+                  <th scope="col" className="py-3 px-6">
+                    IG
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {limeData?.map((_: any, index: number) => (
+                  <tr key={index} className="bg-white border-b text-center">
+                    <td className="py-4 px-6">{limeData && limeData[index]}</td>
+                    <td className="py-4 px-6">{shapData && shapData[index]}</td>
+                    <td className="py-4 px-6">{igData && igData[index]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <div className="flex space-x-1 mb-4">
+              <button
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === "lime"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200"
+                }`}
+                onClick={() => setActiveTab("lime")}
+              >
+                Lime
+              </button>
+              <button
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === "shap"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200"
+                }`}
+                onClick={() => setActiveTab("shap")}
+              >
+                Shap
+              </button>
+              <button
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === "integrated_gradients"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200"
+                }`}
+                onClick={() => setActiveTab("integrated_gradients")}
+              >
+                IG
+              </button>
+            </div>
+
+            {activeTab === "lime" && <LimeExp jsonData={results["lime"]} />}
+            {activeTab === "shap" && <ShapExp jsonData={results["shap"]} />}
+            {activeTab === "integrated_gradients" && (
+              <IgExp jsonData={results["integrated_gradients"]} />
+            )}
+          </div>
         </>
       )}
     </div>

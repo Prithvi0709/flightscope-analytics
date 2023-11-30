@@ -35,8 +35,8 @@ function sortDictionaryAndArray(
 }
 
 const ShapExp = ({ jsonData }: Props) => {
-  const shap_raw_data = jsonData?.data_value[0].data;
-  const shapley_values = jsonData?.data_value[0].values;
+  const shap_raw_data = jsonData?.data_value[0]?.data;
+  const shapley_values = jsonData?.data_value[0]?.values;
 
   const {
     sortedData: sorted_shap_raw_data,
