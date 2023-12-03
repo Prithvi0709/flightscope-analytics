@@ -7,9 +7,7 @@ interface Props {
 const Layout = ({ children }: Props) => {
   return (
     <div className="flex justify-center">
-      <div className="w-full max-w-7xl px-4 border-2 border-black">
-        {children}
-      </div>
+      <div className="w-full max-w-7xl px-4 ">{children}</div>
     </div>
   );
 };

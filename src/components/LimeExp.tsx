@@ -1,5 +1,5 @@
 interface Props {
-  jsonData: any;
+  limeData: any;
 }
 
 interface CustomIframeWindow extends Window {
@@ -8,8 +8,9 @@ interface CustomIframeWindow extends Window {
   updateRawTabular: (newData: any) => void;
 }
 
-const LimeExp = ({ jsonData }: Props) => {
-  const dataValue = jsonData?.data_value;
+const LimeExp = ({ limeData }: Props) => {
+  const dataValue = limeData;
+  console.log(limeData);
 
   // Function to update the iframe displaying the LIME Dashboard
   function updateIframeContent() {

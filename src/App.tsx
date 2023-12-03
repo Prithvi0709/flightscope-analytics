@@ -12,9 +12,9 @@ function App() {
   const [flightId, setFlightId] = useState<string>(
     "2077_6196975_odd_egt_reading" // Set as default value for now
   );
-  const [viewResults, setViewResults] = useState(false);
+  const [viewResults, setViewResults] = useState(false); // Viewing the Graph and Explainability Summary
 
-  const { data: key } = useAuth();
+  const { data: key } = useAuth(); // Performing User Authorization
   console.log(key);
 
   return (

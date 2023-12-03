@@ -1,7 +1,9 @@
 import ImageDisplay from "../helper/ImageDisplay";
 
 interface Props {
-  jsonData: any;
+  shapData: any;
+  plot1: string;
+  plot2: string;
 }
 
 function sortDictionaryAndArray(
@@ -34,9 +36,9 @@ function sortDictionaryAndArray(
   return { sortedData, sortedArray };
 }
 
-const ShapExp = ({ jsonData }: Props) => {
-  const shap_raw_data = jsonData?.data_value[0]?.data;
-  const shapley_values = jsonData?.data_value[0]?.values;
+const ShapExp = ({ shapData, plot1, plot2 }: Props) => {
+  const shap_raw_data = shapData[0].data;
+  const shapley_values = shapData[0].values;
 
   const {
     sortedData: sorted_shap_raw_data,
@@ -49,7 +51,7 @@ const ShapExp = ({ jsonData }: Props) => {
         <label className="block uppercase tracking-wide text-gray-700 text-xl font-bold mb-6">
           SHAP
         </label>
-        {jsonData && (
+        {shapData && (
           <>
             <div className="flex">
               <div className="overflow-x-auto w-[600px]">
@@ -93,8 +95,8 @@ const ShapExp = ({ jsonData }: Props) => {
                 </table>
               </div>
               <div className="flex flex-col">
-                <ImageDisplay base64={jsonData?.plot1} />
-                <ImageDisplay base64={jsonData?.plot2} />
+                <ImageDisplay base64={plot1} />
+                <ImageDisplay base64={plot2} />
               </div>
             </div>
           </>

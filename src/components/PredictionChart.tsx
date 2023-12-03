@@ -119,7 +119,7 @@ const PredictionChart = ({ handleOnClick }: Props) => {
         <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
           Prediction Graph
         </label>
-        <div className="overflow-x-scroll mb-3">
+        <div className="overflow-x-scroll mb-4">
           {error && <p className="text-red-600">{error.message}</p>}
           {isLoading ? (
             <div className="w-full h-[100px] flex justify-center items-center">
@@ -128,10 +128,11 @@ const PredictionChart = ({ handleOnClick }: Props) => {
           ) : (
             <LineChart
               width={12000}
-              height={300}
+              height={200}
               data={combinedData}
               // data={data}
               onClick={handleClick}
+              className="mt-3 mb-3"
             >
               <XAxis dataKey="timestamp" tick={<CustomTick />} />
               <YAxis />
