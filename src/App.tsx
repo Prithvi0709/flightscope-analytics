@@ -1,11 +1,10 @@
 import { useState } from "react";
 import "./App.css";
 import Layout from "./Layout";
-import Form from "./components/Form";
 import PredictionChart from "./components/PredictionChart";
-
-import useAuth from "./hooks/useAuth";
+import FlightForm from "./components/FlightForm";
 import Summary from "./components/Summary";
+import useAuth from "./hooks/useAuth";
 
 function App() {
   const [timestamp, setTimestamp] = useState<string>("");
@@ -20,7 +19,7 @@ function App() {
   return (
     <>
       <Layout>
-        <Form
+        <FlightForm
           handleTimestamp={setTimestamp}
           handleViewResults={(value) => setViewResults(value)}
           handleFlightId={(value) => setFlightId(value)}

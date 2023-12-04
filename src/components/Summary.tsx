@@ -9,23 +9,21 @@ import IgExp from "./IgExp";
 import LimeExp from "./LimeExp";
 import ShapExp from "./ShapExp";
 import ImageDisplay from "../helper/ImageDisplay";
+import SimilarityForm from "./SimilarityForm";
+import LrpExp from "./LrpExp";
+import FeatureChart from "./FeatureChart";
 
 interface Props {
   flightId: string;
   timestamp: string;
 }
 
-type Tab = "lime" | "shap" | "integrated_gradients";
+type Tab = "lime" | "shap" | "integrated_gradients/lrp";
 
 const Summary = ({ timestamp }: Props) => {
-  // const [methodIndex, setMethodIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<Tab>("lime");
-  // const [results, setResults] = useState<ResultsType>({});
-  // const [viewResults, setViewResults] = useState(false);
-  // const [isLoading, setIsLoading] = useState(false);
-  // const methods = ["lime", "shap", "integrated_gradients"];
 
-  const { data: jsonData, isLoading } = useExplainability(timestamp);
+  const { data: jsonData, isLoading } = useExplainability(timestamp, "");
 
   const limeData =
     jsonData?.data_value["lime"][2] &&
@@ -42,6 +40,10 @@ const Summary = ({ timestamp }: Props) => {
   const igData =
     jsonData?.data_value["integrated_gradients"] &&
     getTopIgFeatures(jsonData?.data_value["integrated_gradients"], 5);
+
+  const lrpData =
+    jsonData?.data_value["lrp"] &&
+    getTopIgFeatures(jsonData?.data_value["lrp"], 5);
 
   return (
     <div>
@@ -68,6 +70,9 @@ const Summary = ({ timestamp }: Props) => {
                     <th scope="col" className="py-3 px-6">
                       IG
                     </th>
+                    <th scope="col" className="py-3 px-6">
+                      LRP
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -80,15 +85,24 @@ const Summary = ({ timestamp }: Props) => {
                         {shapData && shapData[index]}
                       </td>
                       <td className="py-4 px-6">{igData && igData[index]}</td>
+                      <td className="py-4 px-6">{lrpData && lrpData[index]}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
               <ImageDisplay base64={jsonData?.similarity_matrix} />
             </div>
+            <div>
+              <FeatureChart
+                limeData={limeData}
+                shapData={shapData}
+                igData={igData}
+                lrpData={lrpData}
+              />
+            </div>
           </div>
-          <div>
-            <div className="flex space-x-1 mb-4">
+          <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-6">
+            <div className="flex space-x-1 m-4">
               <button
                 className={`px-4 py-2 text-sm font-medium ${
                   activeTab === "lime"
@@ -111,13 +125,13 @@ const Summary = ({ timestamp }: Props) => {
               </button>
               <button
                 className={`px-4 py-2 text-sm font-medium ${
-                  activeTab === "integrated_gradients"
+                  activeTab === "integrated_gradients/lrp"
                     ? "bg-blue-500 text-white"
                     : "bg-gray-200"
                 }`}
-                onClick={() => setActiveTab("integrated_gradients")}
+                onClick={() => setActiveTab("integrated_gradients/lrp")}
               >
-                IG
+                IG & LRP
               </button>
             </div>
 
@@ -131,9 +145,19 @@ const Summary = ({ timestamp }: Props) => {
                 plot2={jsonData?.plot2}
               />
             )}
-            {activeTab === "integrated_gradients" && (
-              <IgExp igData={jsonData?.data_value["integrated_gradients"]} />
+            {activeTab === "integrated_gradients/lrp" && (
+              <>
+                <div className="flex w-full justify-around">
+                  <IgExp
+                    igData={jsonData?.data_value["integrated_gradients"]}
+                  />
+                  <LrpExp lrpData={jsonData?.data_value["lrp"]} />
+                </div>
+              </>
             )}
+          </div>
+          <div>
+            <SimilarityForm />
           </div>
         </>
       )}
@@ -144,6 +168,12 @@ const Summary = ({ timestamp }: Props) => {
 export default Summary;
 
 // Logic to send multiple API calls back and forth
+
+// const [methodIndex, setMethodIndex] = useState(0);
+// const [results, setResults] = useState<ResultsType>({});
+// const [viewResults, setViewResults] = useState(false);
+// const [isLoading, setIsLoading] = useState(false);
+// const methods = ["lime", "shap", "integrated_gradients"];
 
 // useEffect(() => {
 //   setIsLoading(true);

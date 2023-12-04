@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ClipLoader } from "react-spinners";
 import { Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
 import usePrediction from "../hooks/usePrediction";
+import CustomTick, { formatDate, formatTime } from "../helper/format";
 
 interface Props {
   handleOnClick: (timestamp: string) => void;
@@ -46,37 +47,6 @@ const PredictionChart = ({ handleOnClick }: Props) => {
   });
 
   // console.log(combinedData);
-
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp.replace(" ", "T"));
-    return new Intl.DateTimeFormat("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    }).format(date);
-  };
-
-  const formatDate = (timestamp: string) => {
-    const date = new Date(timestamp.replace(" ", "T"));
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }).format(date);
-  };
-
-  const CustomTick = ({ x, y, payload }: any) => {
-    const displayLabel = formatTime(payload.value);
-
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text x={0} y={0} dy={16} textAnchor="middle" fill="#666">
-          {displayLabel}
-        </text>
-      </g>
-    );
-  };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -128,7 +98,7 @@ const PredictionChart = ({ handleOnClick }: Props) => {
           ) : (
             <LineChart
               width={12000}
-              height={200}
+              height={150}
               data={combinedData}
               // data={data}
               onClick={handleClick}
@@ -138,12 +108,7 @@ const PredictionChart = ({ handleOnClick }: Props) => {
               <YAxis />
               <Tooltip content={<CustomTooltip />} />
               <Line type="monotone" dataKey="prediction" stroke="#8884d8" />
-              <Line
-                type="monotone"
-                dataKey="truePrediction"
-                stroke="maroon"
-              />{" "}
-              {/* New line for truePrediction */}
+              <Line type="monotone" dataKey="truePrediction" stroke="maroon" />
             </LineChart>
           )}
         </div>

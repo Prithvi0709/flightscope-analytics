@@ -1,9 +1,9 @@
 interface Props {
-  igData: any;
+  lrpData: any;
 }
 
-const IgExp = ({ igData }: Props) => {
-  console.log(igData);
+const LrpExp = ({ lrpData }: Props) => {
+  console.log(lrpData);
 
   function sortData(data: Record<string, number>): Record<string, number> {
     // Convert the data object into an array of objects
@@ -30,9 +30,9 @@ const IgExp = ({ igData }: Props) => {
     <>
       <div className="mb-6 bg-white p-6 shadow-lg rounded-lg">
         <label className="block uppercase tracking-wide text-gray-700 text-xl font-bold mb-6">
-          Integrated Gradients
+          Layer Relevance Propagation
         </label>
-        {igData && (
+        {lrpData && (
           <>
             <div className="overflow-x-auto w-full">
               <table className="w-[400px] mx-auto leading-normal">
@@ -42,12 +42,12 @@ const IgExp = ({ igData }: Props) => {
                       Parameter
                     </th>
                     <th className="px-5 py-3 border-b-2 border-gray-200 text-gray-800  text-center text-sm uppercase font-semibold">
-                      IG Value
+                      LRP Value
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(sortData(igData)).map(([key, value]) => (
+                  {Object.entries(sortData(lrpData)).map(([key, value]) => (
                     <tr key={key} className="hover:bg-gray-200">
                       <td className="px-5 py-3 border-b border-gray-200 bg-white text-sm">
                         <p className="text-gray-900 whitespace-no-wrap">
@@ -71,4 +71,4 @@ const IgExp = ({ igData }: Props) => {
   );
 };
 
-export default IgExp;
+export default LrpExp;
