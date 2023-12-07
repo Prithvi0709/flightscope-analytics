@@ -54,10 +54,10 @@ const Summary = ({ timestamp }: Props) => {
       ) : (
         <>
           <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-6">
-            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-4">
               Explainability Summary (Highest to Lowest)
             </label>
-            <div className="w-full flex">
+            <div className="w-full flex mb-8">
               <table className="w-full text-sm text-center text-gray-500">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
                   <tr>
@@ -65,13 +65,13 @@ const Summary = ({ timestamp }: Props) => {
                       Lime
                     </th>
                     <th scope="col" className="py-3 px-6">
-                      Shap
-                    </th>
-                    <th scope="col" className="py-3 px-6">
                       IG
                     </th>
                     <th scope="col" className="py-3 px-6">
                       LRP
+                    </th>
+                    <th scope="col" className="py-3 px-6">
+                      Shap
                     </th>
                   </tr>
                 </thead>
@@ -81,11 +81,11 @@ const Summary = ({ timestamp }: Props) => {
                       <td className="py-4 px-6">
                         {limeData && limeData[index]}
                       </td>
+                      <td className="py-4 px-6">{igData && igData[index]}</td>
+                      <td className="py-4 px-6">{lrpData && lrpData[index]}</td>
                       <td className="py-4 px-6">
                         {shapData && shapData[index]}
                       </td>
-                      <td className="py-4 px-6">{igData && igData[index]}</td>
-                      <td className="py-4 px-6">{lrpData && lrpData[index]}</td>
                     </tr>
                   ))}
                 </tbody>

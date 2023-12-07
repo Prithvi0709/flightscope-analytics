@@ -8,8 +8,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import useExplainability from "../hooks/useExplainability";
 import CustomTick, { formatDate, formatTime } from "../helper/format";
+import useExplainability from "../hooks/useExplainability";
 
 interface Props {
   limeData: any;
@@ -30,14 +30,18 @@ const FeatureChart = ({ limeData, shapData, igData, lrpData }: Props) => {
     isLoading,
   } = useExplainability("2022-09-05 22:45:36", features.join(","));
 
+  console.log(feature?.data_value?.integrated_gradients[currFeature]);
+
   const data =
     feature?.data_value &&
-    Object.entries(feature?.data_value?.lime[currFeature]).map(
+    Object.entries(feature?.data_value?.integrated_gradients[currFeature]).map(
       ([timestamp, trueVal]) => ({
         timestamp,
         trueVal: trueVal,
       })
     );
+
+  console.log(data);
 
   const handleFeatureChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCurrFeature(e.target.value);
@@ -67,7 +71,7 @@ const FeatureChart = ({ limeData, shapData, igData, lrpData }: Props) => {
 
   return (
     <>
-      <div className="mb-6 bg-white pt-6 pb-6 shadow-lg rounded-lg">
+      <div className="">
         <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
           Feature Graph
         </label>
